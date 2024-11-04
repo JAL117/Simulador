@@ -58,6 +58,7 @@ func NewStatsPanel(capacity int) *StatsPanel {
 			waitingBox,
 			layout.NewSpacer(),
 		),
+		layout.NewSpacer(),
 	)
 
 	return stats

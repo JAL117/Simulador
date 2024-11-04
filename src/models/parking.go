@@ -44,7 +44,6 @@ func NewParking(capacity int) *Parking {
 		parking.availableSpots <- struct{}{}
 	}
 
-	parking.EntryColor = color.NRGBA{R: 40, G: 43, B: 51, A: 255}
 	return parking
 }
 

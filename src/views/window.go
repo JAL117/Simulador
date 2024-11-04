@@ -36,10 +36,10 @@ func CreateWindow(app fyne.App, parkingLot *models.Parking, totalCars int) fyne.
 	road.SetMinSize(fyne.NewSize(1600, 80))
 
 	roadHorizontal := canvas.NewRectangle(roadColor)
-	roadHorizontal.SetMinSize(fyne.NewSize(700, 100))
+	roadHorizontal.SetMinSize(fyne.NewSize(700, 80))
 
 	roadHorizontal2 := canvas.NewRectangle(roadColor)
-	roadHorizontal2.SetMinSize(fyne.NewSize(700, 100))
+	roadHorizontal2.SetMinSize(fyne.NewSize(700, 80))
 
 	roadVertical := canvas.NewRectangle(roadColor)
 	roadVertical.SetMinSize(fyne.NewSize(80, 600))
@@ -77,11 +77,12 @@ func CreateWindow(app fyne.App, parkingLot *models.Parking, totalCars int) fyne.
 		defer ticker.Stop()
 
 		for range ticker.C {
-			roadVertical.FillColor = parkingLot.EntryColor
-			roadVertical.Refresh()
+
 			occupiedSpaces, carIDs := parkingLot.OccupiedSpaces()
 			occupied := 0
 			waitingCars := make([]int, 0)
+			roadVertical.FillColor = parkingLot.EntryColor
+			roadVertical.Refresh()
 			for i, isOccupied := range occupiedSpaces {
 				spaces[i].UpdateStatus(isOccupied, carIDs[i])
 				if isOccupied {

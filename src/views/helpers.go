@@ -22,6 +22,7 @@ func createStatsBox(title string, valueLabel *canvas.Text, bgColor color.Color) 
 		container.NewVBox(
 			container.NewCenter(titleLabel),
 			container.NewCenter(valueLabel),
+			container.NewCenter(),
 		),
 	)
 }

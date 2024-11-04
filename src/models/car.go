@@ -59,11 +59,12 @@ func (p *Parking) Exit(car *Car) {
 		spotFound := false
 		for i := 0; i < p.capacity; i++ {
 			if p.carIDs[i] == car.ID {
+				p.EntryColor = color.NRGBA{R: 255, G: 0, B: 0, A: 255}
 				spotFound = true
 				p.occupiedSpaces[i] = false
 				p.carIDs[i] = 0
 				logger.Printf("=======> Carro %d salió del espacio %d.\n", car.ID, i)
-				p.EntryColor = color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+
 				break
 			}
 		}
