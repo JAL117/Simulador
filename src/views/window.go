@@ -11,7 +11,7 @@ import (
 )
 
 func CreateWindow(app fyne.App, parkingLot *models.Parking, totalCars int) fyne.Window {
-	window := app.NewWindow("Simulador con Concurrencia")
+	window := app.NewWindow("Simulador de estacionamiento")
 	window.SetPadded(false)
 
 	background := canvas.NewRectangle(&color.NRGBA{R: 0, G: 85, B: 19, A: 255})
@@ -105,7 +105,7 @@ func CreateWindow(app fyne.App, parkingLot *models.Parking, totalCars int) fyne.
 
 	go func() {
 		for i := 1; i <= totalCars; i++ {
-			time.Sleep(220 * time.Millisecond)
+			time.Sleep(200 * time.Millisecond)
 			car := &models.Car{ID: i}
 			go parkingLot.Enter(car)
 		}

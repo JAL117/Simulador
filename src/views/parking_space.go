@@ -11,11 +11,12 @@ import (
 )
 
 type ParkingSpace struct {
-	Container   *fyne.Container
-	Background  *canvas.Rectangle
-	CarImage    *canvas.Image
-	NumberLabel *canvas.Text
-	StatusText  *canvas.Text
+	Container     *fyne.Container
+	Background    *canvas.Rectangle
+	CarImage      *canvas.Image
+	NumberLabel   *canvas.Text
+	StatusText    *canvas.Text
+	OccupiedImage string // Nuevo campo para almacenar la imagen ocupada
 }
 
 var (
@@ -63,12 +64,15 @@ func NewParkingSpace(number int) *ParkingSpace {
 
 func (p *ParkingSpace) UpdateStatus(occupied bool, carID int) {
 	if occupied {
-
-		p.CarImage.File = occupiedImages[rand.Intn(len(occupiedImages))]
+		if p.OccupiedImage == "" { // Solo asigna una imagen si no se ha asignado una antes
+			p.OccupiedImage = occupiedImages[rand.Intn(len(occupiedImages))]
+		}
+		p.CarImage.File = p.OccupiedImage // Usa la imagen asignada
 		p.StatusText.Text = fmt.Sprintf("Carro #%d", carID)
 	} else {
 		p.CarImage.File = availableImage
 		p.StatusText.Text = "LIBRE"
+		p.OccupiedImage = "" // Reinicia la imagen ocupada
 	}
 	p.CarImage.Refresh()
 	p.StatusText.Refresh()

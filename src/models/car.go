@@ -34,7 +34,7 @@ func (p *Parking) Enter(car *Car) {
 			go func(car *Car, spot int) {
 				defer p.wg.Done() // Marcamos como hecho cuando termina
 				const minParkingDuration = 3
-				const maxParkingDuration = 5 // Cambié el máximo a 5 segundos
+				const maxParkingDuration = 5
 				time.Sleep(time.Duration(minParkingDuration+rand.Intn(maxParkingDuration-minParkingDuration+1)) * time.Second)
 				p.Exit(car) // Llamamos a Exit después del tiempo de estacionamiento
 			}(car, spotIndex) // Pasamos spotIndex a la goroutine
