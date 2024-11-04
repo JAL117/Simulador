@@ -93,7 +93,7 @@ func (p *Parking) Enter(car *Car) {
 		if spotIndex != -1 {
 			p.occupiedSpaces[spotIndex] = true // Marcamos el espacio como ocupado
 			p.carIDs[spotIndex] = car.ID       // Guardamos el ID del vehículo
-			logger.Printf("==> Carro %d ocupó el espacio %d.\n", car.ID, spotIndex)
+
 		} else {
 			logger.Printf("==> No hay espacio disponible para el carro %d.\n", car.ID)
 		}
