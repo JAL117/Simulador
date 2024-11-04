@@ -10,7 +10,6 @@ import (
 
 const (
 	capacidadEstacionamiento = 20
-	duracion                 = 245.0
 	totalCarros              = 100
 )
 
@@ -22,7 +21,7 @@ func main() {
 		log.Fatalf("Error al crear el estacionamiento con capacidad %d", capacidadEstacionamiento)
 	}
 
-	window := view.CreateWindow(application, parkingLot, duracion, totalCarros)
+	window := view.CreateWindow(application, parkingLot, totalCarros)
 	if window == nil {
 		log.Fatalf("Error al crear la ventana de la aplicación")
 	}

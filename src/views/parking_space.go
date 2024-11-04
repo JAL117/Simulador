@@ -32,7 +32,7 @@ func NewParkingSpace(number int) *ParkingSpace {
 	space.Background = canvas.NewRectangle(backgroundColor)
 	space.Background.SetMinSize(fyne.NewSize(50, 50))
 	space.Background.Resize(fyne.NewSize(60, 100))
-	space.Background.StrokeWidth = 1.5
+	space.Background.StrokeWidth = 0.5
 	space.Background.StrokeColor = borderColor
 
 	space.CarImage = canvas.NewImageFromFile(availableImage)
@@ -65,7 +65,7 @@ func (p *ParkingSpace) UpdateStatus(occupied bool, carID int) {
 	if occupied {
 
 		p.CarImage.File = occupiedImages[rand.Intn(len(occupiedImages))]
-		p.StatusText.Text = fmt.Sprintf("Auto #%d", carID)
+		p.StatusText.Text = fmt.Sprintf("Carro #%d", carID)
 	} else {
 		p.CarImage.File = availableImage
 		p.StatusText.Text = "LIBRE"

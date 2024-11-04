@@ -3,7 +3,6 @@ package views
 import (
 	"Parking-Simulator/src/models"
 	"image/color"
-	"math/rand"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 )
 
-func CreateWindow(app fyne.App, parkingLot *models.Parking, duration float64, totalCars int) fyne.Window {
+func CreateWindow(app fyne.App, parkingLot *models.Parking, totalCars int) fyne.Window {
 	window := app.NewWindow("Simulador con Concurrencia")
 	window.SetPadded(false)
 
@@ -78,6 +77,8 @@ func CreateWindow(app fyne.App, parkingLot *models.Parking, duration float64, to
 		defer ticker.Stop()
 
 		for range ticker.C {
+			roadVertical.FillColor = parkingLot.EntryColor
+			roadVertical.Refresh()
 			occupiedSpaces, carIDs := parkingLot.OccupiedSpaces()
 			occupied := 0
 			waitingCars := make([]int, 0)
@@ -92,8 +93,10 @@ func CreateWindow(app fyne.App, parkingLot *models.Parking, duration float64, to
 			select {
 			case car := <-parkingLot.Queue:
 				waitingCars = append(waitingCars, car.ID)
+				roadHorizontal2.FillColor = parkingLot.WaitColor
+				roadHorizontal2.Refresh()
 			default:
-
+				roadHorizontal2.FillColor = roadColor
 			}
 
 			stats.UpdateWaitingCars(waitingCars)
@@ -102,7 +105,7 @@ func CreateWindow(app fyne.App, parkingLot *models.Parking, duration float64, to
 
 	go func() {
 		for i := 1; i <= totalCars; i++ {
-			time.Sleep(time.Duration(rand.ExpFloat64()*duration) * time.Millisecond)
+			time.Sleep(220 * time.Millisecond)
 			car := &models.Car{ID: i}
 			go parkingLot.Enter(car)
 		}
