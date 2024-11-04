@@ -8,10 +8,9 @@ import (
 	"time"
 )
 
-// Crear un logger personalizado sin fecha y hora
-var logger = log.New(log.Writer(), "", 0) // El tercer parámetro 0 significa que no habrá prefijo de tiempo
+var logger = log.New(log.Writer(), "", 0)
 
-// Parking es la estructura que representa el estacionamiento
+// Estructura que representa el estacionamiento
 type Parking struct {
 	capacity       int           // Capacidad total del estacionamiento
 	mutex          sync.RWMutex  // Mutex para acceso concurrente
@@ -23,7 +22,7 @@ type Parking struct {
 	nextSpotIndex  int           // Índice para el próximo espacio disponible
 }
 
-// NewParking crea un nuevo estacionamiento con la capacidad que se pase como parámetro
+// Crea un nuevo estacionamiento con la capacidad que se pase como parámetro
 func NewParking(capacity int) *Parking {
 	if capacity <= 0 {
 		logger.Fatalf("La capacidad del estacionamiento debe ser mayor que cero.")
@@ -50,7 +49,7 @@ func (p *Parking) Capacity() int {
 	return p.capacity
 }
 
-// GetOccupiedSpaces devuelve los espacios ocupados y los IDs de los vehículos
+// Dvuelve los espacios ocupados y los IDs de los vehículos
 func (p *Parking) OccupiedSpaces() ([]bool, []int) {
 	p.mutex.RLock() // Usamos un bloqueo de lectura para no interferir con otros procesos
 	defer p.mutex.RUnlock()
@@ -68,7 +67,7 @@ func (p *Parking) OccupiedSpaces() ([]bool, []int) {
 	return occupiedSpaces, carIDs
 }
 
-// findNextAvailableSpot busca el próximo espacio libre
+// Busca el próximo espacio libre
 func (p *Parking) findNextSpot() int {
 	for i := 0; i < p.capacity; i++ {
 		index := (p.nextSpotIndex + i) % p.capacity // Usamos el índice circular
@@ -89,28 +88,29 @@ func (p *Parking) Enter(car *Car) {
 
 	select {
 	case <-p.availableSpots: // Si hay un espacio disponible
-		p.entryExitMutex <- struct{}{} // Bloqueamos la entrada/salida
-
 		p.mutex.Lock()                // Bloqueamos para hacer cambios en el estado
 		spotIndex := p.findNextSpot() // Buscamos un espacio libre
 		if spotIndex != -1 {
 			p.occupiedSpaces[spotIndex] = true // Marcamos el espacio como ocupado
 			p.carIDs[spotIndex] = car.ID       // Guardamos el ID del vehículo
+			logger.Printf("==> Carro %d ocupó el espacio %d.\n", car.ID, spotIndex)
 		} else {
 			logger.Printf("==> No hay espacio disponible para el carro %d.\n", car.ID)
 		}
 		p.mutex.Unlock() // Desbloqueamos el acceso
 
-		<-p.entryExitMutex // Liberamos el mutex de entrada/salida
+		// Iniciamos una goroutine separada para simular el tiempo de estacionamiento
+		go func(car *Car, spot int) {
+			const minParkingDuration = 3
+			const maxParkingDuration = 3
+			time.Sleep(time.Duration(minParkingDuration+rand.Intn(maxParkingDuration)) * time.Second)
+			p.Exit(car) // Llamamos a Exit después del tiempo de estacionamiento
+		}(car, spotIndex)
 
-		const minParkingDuration = 3
-		const maxParkingDuration = 3
-		time.Sleep(time.Duration(minParkingDuration+rand.Intn(maxParkingDuration)) * time.Second)
-		// Simulamos el tiempo que el vehículo estará estacionado
-		p.Exit(car) // El vehículo se va
 	default:
+		// Si no hay espacio, el vehículo se agrega a la cola
 		logger.Printf("== Carro %d esperando un espacio.\n", car.ID)
-		p.Queue <- car // Si no hay espacio, el vehículo se agrega a la cola
+		p.Queue <- car
 	}
 }
 
@@ -142,18 +142,29 @@ func (p *Parking) Exit(car *Car) {
 	}
 }
 
-// SimulateArrivals simula la llegada de vehículos al estacionamiento
 func Simulate(parking *Parking, arrivalRate float64, ctx context.Context) {
 	carID := 1
-	for {
-		select {
-		case <-ctx.Done():
-			return // Salir si el contexto se cancela
-		default:
-			time.Sleep(time.Duration(rand.ExpFloat64()/arrivalRate) * time.Second) // Generamos llegadas aleatorias
-			car := &Car{ID: carID}                                                 // Creamos un nuevo vehículo
-			go parking.Enter(car)                                                  // Intentamos que el vehículo llegue al estacionamiento
-			carID++                                                                // Incrementamos el ID del vehículo
+	carChannel := make(chan *Car) // Canal para enviar nuevos vehículos
+
+	// Goroutine para simular la llegada de vehículos
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				close(carChannel) // Cerramos el canal al cancelar el contexto
+				return
+			case <-time.After(time.Duration(rand.ExpFloat64()/arrivalRate) * time.Second):
+				car := &Car{ID: carID}
+				carChannel <- car // Enviamos el vehículo al canal
+				carID++
+			}
 		}
-	}
+	}()
+
+	// Goroutine para manejar vehículos que llegan al estacionamiento
+	go func() {
+		for car := range carChannel {
+			parking.Enter(car) // Intentamos que el vehículo entre al estacionamiento
+		}
+	}()
 }
